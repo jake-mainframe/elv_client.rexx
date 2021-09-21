@@ -33,14 +33,7 @@ Else Do  /* dynamic APF list via PROGxx */
   Do forever
      DSN.NUMAPF = Storage(D2x(AFIRST+24),44) /* DSN of APF library   */
      DSN.NUMAPF = Strip(DSN.NUMAPF,'T')      /* remove blanks        */
-     PRIV.NUMAPF = check_priv(DSN.NUMAPF)
-     if PRIV.NUMAPF <> "ALTER" then do
-       do www = 1 to OUTW.0
-         if OUTW.www == DSN.NUMAPF then
-           PRIV.NUMAPF = "ALTER"
-       end
-     end
-     say DSN.NUMAPF":"PRIV.NUMAPF
+     say DSN.NUMAPF
      CKSMS = Storage(D2x(AFIRST+4),1)        /* DSN of APF library   */
      If Substr(DSN.NUMAPF,1,1) <> X2c('00')  /* check for deleted    */
        then NUMAPF = NUMAPF + 1              /*   APF entry          */
@@ -51,40 +44,3 @@ Else Do  /* dynamic APF list via PROGxx */
   NUMAPF = NUMAPF-1
 End
 exit(0)
-
-check_priv:
-  NOT_AUTH="NOT AUTHORIZED"
-  NO_PROFILE="NO RACF"
-  DSN = arg(1)
-
-  /* First we Check for a specific rule */
-  /* ICH35003I */
-  A = OUTTRAP('OUT.')
-    ADDRESS TSO "LD DA('"DSN"')"
-  B = OUTTRAP('OFF')
-  IF OUT.0==1 THEN DO
-    IF INDEX(OUT.1,"ICH35003I") >0 THEN DO
-      X = OUTTRAP('OUTG.')
-        ADDRESS TSO "LD DA('"DSN"') GEN"
-      Y = OUTTRAP('OFF')
-      IF OUTG.0==1 THEN DO
-        IF INDEX(OUTG.1,NOT_AUTH)>0 THEN
-          RETURN "NONE"
-        IF INDEX(OUTG.1,NO_PROFILE)>0 THEN
-          RETURN "NO RACF PROFILE"
-      END
-      ELSE IF OUTG.0>1 THEN DO
-        ACCESS = WORD(OUTG.17,1)
-        return ACCESS
-      END
-    END
-    IF INDEX(OUT.1,NOT_AUTH)>0 THEN
-      RETURN "NONE"
-    IF INDEX(OUT.1,NO_PROFILE)>0 THEN
-      RETURN "NO RACF PROFILE"
-  END
-  ELSE IF OUT.0>1 THEN DO
-    ACCESS = WORD(OUT.17,1)
-    return ACCESS
-  END
-return -1
