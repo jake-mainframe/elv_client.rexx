@@ -26,10 +26,6 @@ Else Do  /* dynamic APF list via PROGxx */
   ALAST  = C2d(Storage(D2x(APFA + 12),4))    /* Last  entry          */
   LASTONE = 0   /* flag for end of list      */
   NUMAPF = 1    /* tot # of entries in list  */
-  /* Get the WARNING DATASETS. */
-  W = OUTTRAP('OUTW.')
-  ADDRESS TSO "SEARCH ALL WARNING NOMASK"
-  W = OUTTRAP('OFF')
   Do forever
      DSN.NUMAPF = Storage(D2x(AFIRST+24),44) /* DSN of APF library   */
      DSN.NUMAPF = Strip(DSN.NUMAPF,'T')      /* remove blanks        */
